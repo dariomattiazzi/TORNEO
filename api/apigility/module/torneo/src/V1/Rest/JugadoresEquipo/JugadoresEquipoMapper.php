@@ -63,7 +63,6 @@ class JugadoresEquipoMapper
       }
       array_multisort(@$aux_prom, SORT_ASC, $arr_jugador);
 
-      if (!empty($arr_jugador)) {
         $arr_jugador [] = array(
           'text'              => "EN CONTRA",
           'jugador_id'        => 0,
@@ -72,7 +71,15 @@ class JugadoresEquipoMapper
           'jugador_equipo_id' => '',
         );
 
+        $arr_jugador [] = array(
+          'text'              => "INTERZONAL",
+          'jugador_id'        => 9999,
+          'jugador_nombre'    => '',
+          'jugador_apellido'  => '',
+          'jugador_equipo_id' => '',
+        );
 
+      if (!empty($arr_jugador)) {
 
         $json = new stdClass();
         $json->success   = true;
@@ -102,30 +109,55 @@ class JugadoresEquipoMapper
     $sql = new Sql($this->adapter);
     $select = $sql->select();
     $select->from('jugador');
-    $select->where(array('jugador_id' => $id_jugador));
+    $select->where(array('jugador_equipo_id' => $id_equipo));
     $selectString = $sql->getSqlStringForSqlObject($select);
     $results = $this->adapter->query($selectString, Adapter::QUERY_MODE_EXECUTE);
-    $r = $results->toArray();
+    $jugadores = $results->toArray();
 
-    $jugador = $r['0'];
-    //print_r($jugador); die;
-    if(!empty($jugador['jugador_equipo_id'])){
-      $equipo  = $this->buscoEquipo($jugador['jugador_equipo_id']);
+    $cant_jug = count($jugadores);
+    // print_r($cant_jug);
+    //
+    // if ($cant_jug <= 16) {
+    //   echo "menor";
+    // }else{
+    //   echo "mayor";
+    // }
+    // die;
+
+    if ($cant_jug <= 20) {
+      $sql = new Sql($this->adapter);
+      $select = $sql->select();
+      $select->from('jugador');
+      $select->where(array('jugador_id' => $id_jugador));
+      $selectString = $sql->getSqlStringForSqlObject($select);
+      $results = $this->adapter->query($selectString, Adapter::QUERY_MODE_EXECUTE);
+      $r = $results->toArray();
+
+      $jugador = $r['0'];
+      //print_r($jugador); die;
+      if(!empty($jugador['jugador_equipo_id'])){
+        $equipo  = $this->buscoEquipo($jugador['jugador_equipo_id']);
+        $json = new stdClass();
+        $json->success = true;
+        $json->msg = "Error, el jugador ya está inscripto en el equipo: ".$equipo;
+        return $json;
+      }else {
+        $sql = new Sql($this->adapter);
+        $update = $sql->update();
+        $update->table('jugador');
+        $update->set(array("jugador_equipo_id" => $id_equipo));
+        $update->where->equalTo("jugador_id", $id_jugador);
+        $updateString = $sql->getSqlStringForSqlObject($update);
+        $this->adapter->query($updateString, Adapter::QUERY_MODE_EXECUTE);
+
+        $json = new stdClass();
+        $json->success   = true;
+        return $json;
+      }
+    }else {
       $json = new stdClass();
       $json->success = true;
-      $json->msg = "Error, el jugador ya está inscripto en el equipo: ".$equipo;
-      return $json;
-    }else {
-      $sql = new Sql($this->adapter);
-      $update = $sql->update();
-      $update->table('jugador');
-      $update->set(array("jugador_equipo_id" => $id_equipo));
-      $update->where->equalTo("jugador_id", $id_jugador);
-      $updateString = $sql->getSqlStringForSqlObject($update);
-      $this->adapter->query($updateString, Adapter::QUERY_MODE_EXECUTE);
-
-      $json = new stdClass();
-      $json->success   = true;
+      $json->msg = "Error, el equipo tiene la cantidad max. de jugadores ".$equipo;
       return $json;
     }
   }

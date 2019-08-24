@@ -43,6 +43,7 @@ class goleadoresporcategoriaMapper
                          'fixture_estado'       => "false" //Se lo agrego cansado PROBAR!!!!! solo deberia mostrar los sancionados cuyo partido esté cerrado
     ));
     $select->where->notequalTo("goles.goles_jugador_id", 0);
+    $select->where->notequalTo("goles.goles_jugador_id", 9999);
     $select->columns(array('golesXjug' => new \Zend\Db\Sql\Expression('SUM(goles.goles_cantidad)')));
     $select->group('goles.goles_jugador_id');
     $select->order('golesXjug DESC');

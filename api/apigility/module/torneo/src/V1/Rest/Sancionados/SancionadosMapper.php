@@ -34,21 +34,25 @@ class sancionadosMapper
     $torneo_id     = $_GET["torneo_id"];
     $categoria_id  = $_GET["categoria_id"];
 
+
     $sql = new Sql($this->adapter);
     $select = $sql->select();
-    $select->from('fixture');
-    $select->join(array("sancionados" => "sancionados"),'fixture.fixture_id = sancionados.sancionados_fixture_id',array('*'),'inner');
+    $select->from('sancionados');
     $select->join(array("jugador"     => "jugador"),'sancionados.sancionados_jugador_id = jugador.jugador_id',array('*'),'inner');
     $select->join(array("equipo"      => "equipo"),'sancionados.sancionados_equipo_id = equipo.equipo_id',array('*'),'inner');
-    $select->where(array('fixture_categoria_id' => $categoria_id,
+    $select->where(array('sancionados_categoria_id' => $categoria_id,
                          'sancionados_sancion > 0',
-                         'fixture_estado'       => "false" //Se lo agrego cansado PROBAR!!!!! solo deberia mostrar los sancionados cuyo partido esté cerrado
+//                         'fixture_estado'       => "false" //Se lo agrego cansado PROBAR!!!!! solo deberia mostrar los sancionados cuyo partido esté cerrado
                        ));
     $select->where->isNotNull("sancionados_sancion");
     $select->order('sancionados.sancionados_equipo_id, jugador.jugador_apellido, jugador.jugador_nombre, sancionados.sancionados_sancion');
+    // $select->limit('10');
     $selectString = $sql->getSqlStringForSqlObject($select);
+    //  echo $selectString; die;
     $results = $this->adapter->query($selectString, Adapter::QUERY_MODE_EXECUTE);
     $sancionados = $results->toArray();
+
+    // print_r($sancionados); die;
 
     foreach ($sancionados as $key => $row) {
       $s = $row['sancionados_sancion'];
@@ -65,6 +69,7 @@ class sancionadosMapper
         'sancion'             => $sancion,
         "sancionados_vuelve"  =>  $row ['sancionados_vuelve'],
         "equipo_nombre"       =>  $row ['equipo_nombre'],
+
       );
     }
 

@@ -79,10 +79,9 @@ class fixtureMapper
       $aux_dif[$key]  = $row['dif'];
       $aux_gf[$key]  = $row['gf'];
     }
+
     array_multisort(@$aux_ptos, SORT_DESC, @$aux_dif, SORT_DESC, $aux_gf, SORT_DESC, $arr);
     */
-
-    // print_r($arr_fixt); die;
 
     if(!empty($arr_fixt)){
       $json = new stdClass();
@@ -99,31 +98,19 @@ class fixtureMapper
   }
 
   function PartidosXfechaXzona($torneo_id, $categoria_id, $zona_id){
-
-    // if ($categoria_id == 125) {
-    //   $sql = new Sql($this->adapter);
-    //   $select = "SELECT * FROM fixture WHERE ";
-    //
-    //   $select .= "fixture_torneo_id = $torneo_id AND fixture_categoria_id = $categoria_id AND fixture_zona_id = $zona_id AND fixture_fecha > 9";
-    //   $selectString = $select;
-    //   //echo "$selectString"; die;
-    //   $results = $this->adapter->query($selectString, Adapter::QUERY_MODE_EXECUTE);
-    //   $fixture = $results->toArray();
-    // }else{
-      $sql = new Sql($this->adapter);
-      $select = $sql->select();
-      $select->from('fixture');
-      $select->where(array(
-        'fixture_torneo_id' => $torneo_id,
-        'fixture_categoria_id' => $categoria_id,
-        'fixture_zona_id' => $zona_id
-      ));
-      $select->order(array('fixture_torneo_id', 'fixture_categoria_id', 'fixture_zona_id', 'fixture_fecha', 'fixture_turno_id', 'fixture_cancha_id'));
-      $selectString = $sql->getSqlStringForSqlObject($select);
-      //echo "$selectString"; die;
-      $results = $this->adapter->query($selectString, Adapter::QUERY_MODE_EXECUTE);
-      $fixture = $results->toArray();
-    // }
+    $sql = new Sql($this->adapter);
+    $select = $sql->select();
+    $select->from('fixture');
+    $select->where(array(
+      'fixture_torneo_id' => $torneo_id,
+      'fixture_categoria_id' => $categoria_id,
+      'fixture_zona_id' => $zona_id
+    ));
+    $select->order(array('fixture_torneo_id', 'fixture_categoria_id', 'fixture_zona_id', 'fixture_fecha', 'fixture_turno_id', 'fixture_cancha_id'));
+    $selectString = $sql->getSqlStringForSqlObject($select);
+    //echo "$selectString"; die;
+    $results = $this->adapter->query($selectString, Adapter::QUERY_MODE_EXECUTE);
+    $fixture = $results->toArray();
 
     foreach ($fixture as $key => $row) {
       if($row ['fixture_fase_id'] > 1){
@@ -140,13 +127,16 @@ class fixtureMapper
           }else{
             $fecha = $fase[0]['fase_descri'];
           }
+          //$fecha = $fase[0]['fase_descri'];
         }else {
           $fecha = "A CONFIRMAR";
 
         }
+        //		$fecha = $this->nombre_fase($row ['fixture_fase_id']);
       }else{
         $fecha = $row ['fixture_fecha'];
       }
+      //print_r($row); die;
       if(!empty($row ['fixture_penales_eq1'])){
         $pen_eq1 = ' ('.$row ['fixture_penales_eq1'].')';
       }else{
@@ -158,8 +148,25 @@ class fixtureMapper
       }else{
         $pen_eq2 = '';
       }
+      if(is_int($fecha)){
+	$orden = $fecha;
+      }else{
+$order = 1;
+switch($fecha){
+case 'FINAL':
+$order = 9;
+break;
+case 'Semi Final':
+$order = 8;
+break;
+case 'Cuartos de final':
+$order = 7;
+break;
+}
+	}
       $arr_fixture [] = array(
         'fecha'                => $fecha,
+	'orden'                => $order,
         'fixture_id'           => $row ['fixture_id'],
         'fixture_torneo_id'    => $row ['fixture_torneo_id'],
         'fixture_categoria_id' => $row ['fixture_categoria_id'],
@@ -181,8 +188,10 @@ class fixtureMapper
         'fixture_estado'       => $row ['fixture_estado'],
       );
     }
+
     return $arr_fixture;
   }
+
 
   function nombre_fase($id){
     $sql = new Sql($this->adapter);
@@ -246,13 +255,8 @@ class fixtureMapper
       $eq = $equipo[0]['equipo_nombre'];
       return $eq;
     }else {
-      if($equipo_id == '999'){
-        $eq = "LIBRE";
-        return $eq;
-      }elseif ($equipo_id == '888'){
-        $eq = "INTERZONAL";
-        return $eq;
-      }
+      $eq = "LIBRE";
+      return $eq;
     }
 
   }

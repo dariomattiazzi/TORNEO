@@ -115,48 +115,87 @@ class jugadorMapper
 
   public function crea($data)
   {
-    try {
-      $dataInsert = array(
-        "jugador_nombre"    => $data->jugador_nombre,
-        "jugador_apellido"  => $data->jugador_apellido,
-        "jugador_equipo_id" => $data->jugador_equipo_id,
-        "jugador_dni"       => $data->jugador_dni,
-        "jugador_fechanac" => $data->jugador_fechanac,
-      );
-      $sql = new Sql($this->adapter);
-      $insert = $sql->insert();
-      $insert->into('jugador');
-      $insert->values($dataInsert);
-      $insertString = $sql->getSqlStringForSqlObject($insert);
-      // echo $insertString; die;
-      $results = $this->adapter->query($insertString, Adapter::QUERY_MODE_EXECUTE);
-      $json = new stdClass();
-      $json->success = true;
-      return $json;
-    } catch (Exception $e) {
+    // controlo que el dni no este vacio
+    if (empty($data->jugador_dni)) {
       $json = new stdClass();
       $json->success = false;
-      $json->msg = "No se pudo ingresar el jugador.";
+      $json->msg = " El numero de dni está vacio.";
       return $json;
     }
+
+    // valido que el dni no esté cargado
+    $j = $this->validajugador($data);
+
+    if (!empty($j)) {
+      $json = new stdClass();
+      $json->success = false;
+      $json->msg = " El numero de DNI $data->jugador_dni ya existe.";
+      return $json;
+    }else{
+      try {
+        $dataInsert = array(
+          "jugador_nombre"    => $data->jugador_nombre,
+          "jugador_apellido"  => $data->jugador_apellido,
+          "jugador_equipo_id" => $data->jugador_equipo_id,
+          "jugador_dni"       => $data->jugador_dni,
+          "jugador_fechanac" => $data->jugador_fechanac,
+        );
+        $sql = new Sql($this->adapter);
+        $insert = $sql->insert();
+        $insert->into('jugador');
+        $insert->values($dataInsert);
+        $insertString = $sql->getSqlStringForSqlObject($insert);
+        $results = $this->adapter->query($insertString, Adapter::QUERY_MODE_EXECUTE);
+        $json = new stdClass();
+        $json->success = true;
+        return $json;
+      } catch (Exception $e) {
+        $json = new stdClass();
+        $json->success = false;
+        $json->msg = "No se pudo ingresar el jugador.";
+        return $json;
+      }
+    }
+  }
+
+  public function validajugador($data)
+  {
+        $dni = $data->jugador_dni;
+
+        $sql = new Sql($this->adapter);
+        $select = $sql->select();
+        $select->from('jugador');
+        $select->where('jugador_dni = '.$dni);
+        $selectString = $sql->getSqlStringForSqlObject($select);
+        $results = $this->adapter->query($selectString, Adapter::QUERY_MODE_EXECUTE);
+        $jug_dni = $results->toArray();
+        return $jug_dni;
   }
 
   public function actualiza($data)
   {
     try {
       $id = $data->jugador_id;
+
+      if ($data->jugador_equipo_id == '') {
+        $equipo_id = null;
+      }else {
+          $equipo_id = $data->jugador_equipo_id;
+      }
+
       $sql = new Sql($this->adapter);
       $update = $sql->update();
       $update->table('jugador');
       $update->set(array(
         "jugador_nombre"    => $data->jugador_nombre,
         "jugador_apellido"  => $data->jugador_apellido,
-        "jugador_equipo_id" => $data->jugador_equipo_id,
+        "jugador_equipo_id" => $equipo_id,
         "jugador_dni"       => $data->jugador_dni,
         "jugador_fechanac"  => $data->jugador_fechanac,
       ));
       $update->where->equalTo("jugador_id", $id);
       $updateString = $sql->getSqlStringForSqlObject($update);
+      // echo $updateString; die;
       $this->adapter->query($updateString, Adapter::QUERY_MODE_EXECUTE);
       $json = new stdClass();
       $json->success = true;
