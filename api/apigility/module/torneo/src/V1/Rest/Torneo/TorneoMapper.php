@@ -45,7 +45,8 @@ class torneoMapper
 			$arr_torneo [] = array(
 				'torneo_id'       => $row ['torneo_id'],
 				'torneo_descri'   => $row ['torneo_descri'],
-				'torneo_estado'   => $row ['torneo_estado']
+				'torneo_estado'   => $row ['torneo_estado'],
+				'torneo_deporte_id'   => $row ['torneo_deporte_id']
 			);
 		}
 		

@@ -111,7 +111,7 @@ class reporteMapper
     $nrorep = $results->getGeneratedValue();
     $j = $nrorep;
 
-    $url = 'http://dario-casa.sytes.net/api/tcpdf/gclpdf/'.$reporte.'.php?param='.$j;
+    $url = '/api/tcpdf/gclpdf/'.$reporte.'.php?param='.$j;
 
     $json = new stdClass();
     $json->success = true;
@@ -187,7 +187,7 @@ if(!empty($arr)){
   $results = $this->adapter->query($insertString, Adapter::QUERY_MODE_EXECUTE);
   $nrorep = $results->getGeneratedValue();
   $j = base64_encode($nrorep);
-  $url = 'http://dario-casa.sytes.net/api/tcpdf/gclpdf/fixturecompleto.php?param='.$j;
+  $url = '/api/tcpdf/gclpdf/fixturecompleto.php?param='.$j;
   $json = new stdClass();
   $json->success = true;
   $json->url = "$url";
@@ -237,7 +237,7 @@ foreach ($partidos as $key => $row) {
 if(!empty($arr)){
   $json_data = json_encode($arr);
   $j = base64_encode($json_data);
-  $url = 'http://dario-casa.sytes.net/api/tcpdf/gclpdf/'.$reporte.'.php?param='.$j;
+  $url = '/api/tcpdf/gclpdf/'.$reporte.'.php?param='.$j;
   $json = new stdClass();
   $json->success = true;
   $json->url = "$url";
@@ -428,7 +428,7 @@ if(!empty($arr)){
   echo $nrorep; die;
 
   $j = base64_encode($nrorep);
-  $url = 'http://dario-casa.sytes.net/api/tcpdf/gclpdf/fixturecompleto.php?param='.$j;
+  $url = '/api/tcpdf/gclpdf/fixturecompleto.php?param='.$j;
   $json = new stdClass();
   $json->success = true;
   $json->url = "$url";

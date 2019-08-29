@@ -259,7 +259,7 @@ class sancionadosMapper
         $oResponse = new Response();
         $response = new stdClass;
         $response->success = true;
-        $response->mensaje = "Sancionado eliminado.";
+        $response->msg = "Sancionado eliminado.";
         $oResponse->setContent(json_encode($response));
         return $oResponse;
     } catch (Exception $e) {
