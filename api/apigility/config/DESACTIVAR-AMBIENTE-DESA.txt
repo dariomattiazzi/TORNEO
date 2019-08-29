@@ -1,0 +1,8 @@
+
+Para desactivar el ambiente de desarrollo se debe quitar el archivo:
+
+	- config/development.config.php
+
+
+
+
